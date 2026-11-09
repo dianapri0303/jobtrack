@@ -27,19 +27,32 @@ JobTrack is a job application tracker that keeps vacancies, recruiters and follo
 ```
 jobtrack/
 ├── frontend/   # Next.js app
-└── backend/    # Express API (coming soon)
+└── backend/    # Express API 
 ```
 
 ## Getting started
 
+### Frontend
+
 ```bash
-git clone https://github.com/dianapri0303/jobtrack.git
-cd jobtrack/frontend
+cd frontend
 npm install
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+### Backend
+
+```bash
+cd backend
+npm install
+cp .env.example .env
+npm run dev
+```
+
+Fill in `MONGODB_URI` in `.env` with your MongoDB connection string. The API runs on [http://localhost:4000](http://localhost:4000); health check: `GET /api/health`.
+
 
 ## Author
 
