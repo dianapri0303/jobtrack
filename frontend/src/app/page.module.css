@@ -19,3 +19,16 @@
   font-size: 18px;
   opacity: 0.8;
 }
+
+.button {
+  padding: 12px 24px;
+  border-radius: 8px;
+  background-color: #1f6feb;
+  color: #ffffff;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.button:hover {
+  background-color: #1a5fd0;
+}
