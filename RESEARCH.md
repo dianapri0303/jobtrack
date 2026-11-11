@@ -61,7 +61,91 @@ Tools I used while learning, including AI assistants, are described in [AI.md](A
 - Express "Hello world" example: https://expressjs.com/en/starter/hello-world.html
 - dotenv: https://github.com/motdotla/dotenv
 
+## Day 3 — 10.11.2026 · Application model and CRUD API
+
+**What I needed to learn and why**
+
+- How to describe a job application in MongoDB with a Mongoose schema, because the whole app is built around this data.
+- How to build CRUD routes in Express and which HTTP methods and status codes to use.
+- How to handle errors so the API returns clear messages instead of crashing.
+
+**What I learned**
+
+- A Mongoose schema defines fields, types and rules (`required`, `enum`, `default`, `trim`). Validation runs on create, and on update only with `runValidators: true`.
+- `timestamps: true` adds `createdAt` and `updatedAt` automatically.
+- I split the code into model, controller and router so each file has one job.
+- In Express 5, errors thrown in `async` route handlers are passed to the error-handling middleware automatically, so I do not need a `try/catch` wrapper in every controller.
+- I return `400` for client mistakes (invalid JSON, `ValidationError`, `CastError` for a malformed id), `404` when a document does not exist, `201` after creating and `204` after deleting.
+
+**How I tested**
+
+- I tested every endpoint manually with `curl`: create, list, get by id, update the status, delete.
+- I also tested error cases: a request without `company` (400), an invalid id (400).
+- Next step: automate these checks with tests and run them in GitHub Actions.
+
+**Sources**
+
+- Express error handling: https://expressjs.com/en/guide/error-handling.html
+- Mongoose validation: https://mongoosejs.com/docs/validation.html
+- HTTP response status codes (MDN): https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
+
+## Day 3 — 10.11.2026 · Application model and CRUD API
+
+**What I needed to learn and why**
+
+- How to describe a job application in MongoDB with a Mongoose schema, because the whole app is built around this data.
+- How to build CRUD routes in Express and which HTTP methods and status codes to use.
+- How to handle errors so the API returns clear messages instead of crashing.
+
+**What I learned**
+
+- A Mongoose schema defines fields, types and rules (`required`, `enum`, `default`, `trim`). Validation runs on create, and on update only with `runValidators: true`.
+- `timestamps: true` adds `createdAt` and `updatedAt` automatically.
+- I split the code into model, controller and router so each file has one job.
+- In Express 5, errors thrown in `async` route handlers are passed to the error-handling middleware automatically, so I do not need a `try/catch` wrapper in every controller.
+- I return `400` for client mistakes (invalid JSON, `ValidationError`, `CastError` for a malformed id), `404` when a document does not exist, `201` after creating and `204` after deleting.
+
+**How I tested**
+
+- I tested every endpoint manually with `curl`: create, list, get by id, update the status, delete.
+- I also tested error cases: a request without `company` (400), an invalid id (400).
+- Next step: automate these checks with tests and run them in GitHub Actions.
+
+**Sources**
+
+- Express error handling: https://expressjs.com/en/guide/error-handling.html
+- Mongoose validation: https://mongoosejs.com/docs/validation.html
+- HTTP response status codes (MDN): https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
+
+## Day 3 — 10.11.2026 · Application model and CRUD API
+
+**What I needed to learn and why**
+
+- How to describe a job application in MongoDB with a Mongoose schema, because the whole app is built around this data.
+- How to build CRUD routes in Express and which HTTP methods and status codes to use.
+- How to handle errors so the API returns clear messages instead of crashing.
+
+**What I learned**
+
+- A Mongoose schema defines fields, types and rules (`required`, `enum`, `default`, `trim`). Validation runs on create, and on update only with `runValidators: true`.
+- `timestamps: true` adds `createdAt` and `updatedAt` automatically.
+- I split the code into model, controller and router so each file has one job.
+- In Express 5, errors thrown in `async` route handlers are passed to the error-handling middleware automatically, so I do not need a `try/catch` wrapper in every controller.
+- I return `400` for client mistakes (invalid JSON, `ValidationError`, `CastError` for a malformed id), `404` when a document does not exist, `201` after creating and `204` after deleting.
+
+**How I tested**
+
+- I tested every endpoint manually with `curl`: create, list, get by id, update the status, delete.
+- I also tested error cases: a request without `company` (400), an invalid id (400).
+- Next step: automate these checks with tests and run them in GitHub Actions.
+
+**Sources**
+
+- Express error handling: https://expressjs.com/en/guide/error-handling.html
+- Mongoose validation: https://mongoosejs.com/docs/validation.html
+- HTTP response status codes (MDN): https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
+
 ## Next
 
-- Mongoose model for job applications and CRUD routes.
+- Frontend: applications list page and create form (Formik + Yup).
 - GitHub Actions to run lint and tests on every push. This is new for me, and I will document how I learn it here.

@@ -53,6 +53,22 @@ npm run dev
 
 Fill in `MONGODB_URI` in `.env` with your MongoDB connection string. The API runs on [http://localhost:4000](http://localhost:4000); health check: `GET /api/health`.
 
+## API
+
+Base URL: `http://localhost:4000/api`
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/health` | Check that the server is running |
+| GET | `/applications` | List all applications (newest first) |
+| GET | `/applications/:id` | Get one application |
+| POST | `/applications` | Create an application (`company` and `position` are required) |
+| PATCH | `/applications/:id` | Update an application |
+| DELETE | `/applications/:id` | Delete an application |
+
+Application statuses: `applied`, `interview`, `offer`, `rejected`.
+
+Error responses: `400` for invalid JSON, validation errors or an invalid id, `404` if the application does not exist, `500` for unexpected server errors.
 
 ## Author
 
