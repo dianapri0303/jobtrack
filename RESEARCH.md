@@ -121,7 +121,47 @@ Tools I used while learning, including AI assistants, are described in [AI.md](A
 - Yup: https://github.com/jquense/yup
 - Next.js `'use client'` directive: https://nextjs.org/docs/app/api-reference/directives/use-client
 
+## Day 5 — 12.11.2026 · Connecting the frontend to the API
+
+**What I needed to learn and why**
+
+- How to load and save data from the Express API in Next.js, so applications are stored in MongoDB and survive a page refresh.
+- How to filter applications by status.
+- How to pass the API URL to the frontend without hard-coding it.
+
+**What did not work**
+
+- After connecting the frontend, the page showed both "Could not save the application" and "Could not load applications". The backend terminal said `MongoDB connected` and `Server is running on port 4000`, but `http://localhost:4000/api/health` in the browser returned "This site can't be reached".
+- The log message was misleading. In Express 5, the `app.listen` callback is also called when the server fails to start, with the error as its first argument. My callback ignored that argument and printed "Server is running" anyway.
+- The most likely cause was that port 4000 was still taken by an old server process from an earlier session. I could not confirm which process it was, but after freeing the port and restarting, the API responded.
+- Fix: the `app.listen` callback now checks the `error` argument, logs `Server failed to start` with the reason and exits. I freed the port with `lsof -ti :4000 | xargs kill -9` and restarted the backend.
+- Lesson: a success message in the log is not proof that something works. I now check the health endpoint directly instead of trusting the log.
+
+**What I learned**
+
+- TanStack Query separates reading data (`useQuery`) from changing data (`useMutation`). It handles loading and error states and caches the results.
+- The `queryKey` works like a label for cached data. Putting the status filter into the key (`['applications', statusFilter]`) makes the query run again automatically when the filter changes.
+- After creating an application I call `invalidateQueries`, so the list is fetched again and shows the new item.
+- I filter on the server (`GET /api/applications?status=interview`) instead of in the browser, so the frontend only receives the data it needs. The backend checks the value against the list of statuses before using it in the query.
+- In Next.js, only environment variables that start with `NEXT_PUBLIC_` are available in browser code. I use `NEXT_PUBLIC_API_URL` in `.env.local`.
+- The default Next.js `.gitignore` ignores every `.env*` file, which would also hide `.env.example`. I added `!.env.example` so the template is committed while `.env.local` stays private.
+- The form now waits for the server: the button is disabled while saving, and the form is only reset after a successful save, so no input is lost if the request fails.
+
+**How I tested**
+
+- Added an application and refreshed the page: it is still there and also visible in MongoDB Atlas (Browse Collections).
+- Filtered by `interview` and back to `all`.
+- Stopped the backend and refreshed the page: the error message is shown after TanStack Query's automatic retries.
+- `npm run lint` passes.
+
+**Sources**
+
+- TanStack Query quick start: https://tanstack.com/query/latest/docs/framework/react/quick-start
+- Next.js environment variables: https://nextjs.org/docs/app/guides/environment-variables
+- Axios instance: https://axios-http.com/docs/instance
+- Express 5 migration guide (`app.listen` changes): https://expressjs.com/en/guide/migrating-5.html
+
 ## Next
 
-- Connect the frontend to the API with TanStack Query and add a status filter.
+- Follow-up list ("who to contact today") and monthly statistics with a goal of 30 applications.
 - GitHub Actions to run lint and tests on every push. This is new for me, and I will document how I learn it here.

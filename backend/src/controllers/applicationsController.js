@@ -1,7 +1,9 @@
-import { Application } from '../models/application.js';
+import { Application, STATUSES } from '../models/application.js';
 
 export const getApplications = async (req, res) => {
-  const applications = await Application.find().sort({ appliedAt: -1 });
+  const { status } = req.query;
+  const filter = STATUSES.includes(status) ? { status } : {};
+  const applications = await Application.find(filter).sort({ appliedAt: -1 });
   res.json(applications);
 };
 

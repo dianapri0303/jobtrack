@@ -33,7 +33,11 @@ export const startServer = () => {
     res.status(500).json({ message: 'Internal server error' });
   });
 
-  app.listen(PORT, () => {
+  app.listen(PORT, (error) => {
+    if (error) {
+      console.error('Server failed to start:', error.message);
+      process.exit(1);
+    }
     console.log(`Server is running on port ${PORT}`);
   });
 };

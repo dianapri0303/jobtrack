@@ -44,3 +44,8 @@
 .button:hover {
   background-color: #1a5fd0;
 }
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

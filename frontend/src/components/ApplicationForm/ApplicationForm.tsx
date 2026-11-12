@@ -6,7 +6,7 @@ import { STATUSES, type NewApplication } from '@/types/application';
 import css from './ApplicationForm.module.css';
 
 interface ApplicationFormProps {
-  onSubmit: (values: NewApplication) => void;
+  onSubmit: (values: NewApplication) => Promise<void>;
 }
 
 const today = new Date().toISOString().slice(0, 10);
@@ -32,51 +32,57 @@ export default function ApplicationForm({ onSubmit }: ApplicationFormProps) {
     <Formik
       initialValues={initialValues}
       validationSchema={validationSchema}
-      onSubmit={(values, actions) => {
-        onSubmit(values);
-        actions.resetForm();
+      onSubmit={async (values, actions) => {
+        try {
+          await onSubmit(values);
+          actions.resetForm();
+        } catch {
+          // the page shows the error message, so the form keeps the values
+        }
       }}
     >
-      <Form className={css.form}>
-        <label className={css.label}>
-          Company
-          <Field className={css.input} name="company" type="text" />
-          <ErrorMessage className={css.error} name="company" component="span" />
-        </label>
+      {({ isSubmitting }) => (
+        <Form className={css.form}>
+          <label className={css.label}>
+            Company
+            <Field className={css.input} name="company" type="text" />
+            <ErrorMessage className={css.error} name="company" component="span" />
+          </label>
 
-        <label className={css.label}>
-          Position
-          <Field className={css.input} name="position" type="text" />
-          <ErrorMessage className={css.error} name="position" component="span" />
-        </label>
+          <label className={css.label}>
+            Position
+            <Field className={css.input} name="position" type="text" />
+            <ErrorMessage className={css.error} name="position" component="span" />
+          </label>
 
-        <label className={css.label}>
-          Job link
-          <Field className={css.input} name="link" type="text" placeholder="https://..." />
-          <ErrorMessage className={css.error} name="link" component="span" />
-        </label>
+          <label className={css.label}>
+            Job link
+            <Field className={css.input} name="link" type="text" placeholder="https://..." />
+            <ErrorMessage className={css.error} name="link" component="span" />
+          </label>
 
-        <label className={css.label}>
-          Status
-          <Field className={css.input} name="status" as="select">
-            {STATUSES.map((status) => (
-              <option key={status} value={status}>
-                {status}
-              </option>
-            ))}
-          </Field>
-        </label>
+          <label className={css.label}>
+            Status
+            <Field className={css.input} name="status" as="select">
+              {STATUSES.map((status) => (
+                <option key={status} value={status}>
+                  {status}
+                </option>
+              ))}
+            </Field>
+          </label>
 
-        <label className={css.label}>
-          Applied on
-          <Field className={css.input} name="appliedAt" type="date" />
-          <ErrorMessage className={css.error} name="appliedAt" component="span" />
-        </label>
+          <label className={css.label}>
+            Applied on
+            <Field className={css.input} name="appliedAt" type="date" />
+            <ErrorMessage className={css.error} name="appliedAt" component="span" />
+          </label>
 
-        <button className={css.button} type="submit">
-          Add application
-        </button>
-      </Form>
+          <button className={css.button} type="submit" disabled={isSubmitting}>
+            {isSubmitting ? 'Saving...' : 'Add application'}
+          </button>
+        </Form>
+      )}
     </Formik>
   );
 }
