@@ -23,4 +23,14 @@ export interface NewApplication {
   link: string;
   status: ApplicationStatus;
   appliedAt: string;
+  followUpDate: string;
+}
+
+export interface Summary {
+  month: string;
+  goal: number;
+  appliedThisMonth: number;
+  remaining: number;
+  byStatus: Record<ApplicationStatus, number>;
+  followUps: Application[];
 }

@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import {
   getApplications,
+  getSummary,
   getApplicationById,
   createApplication,
   updateApplication,
@@ -10,6 +11,7 @@ import {
 const router = Router();
 
 router.get('/', getApplications);
+router.get('/summary', getSummary);
 router.get('/:id', getApplicationById);
 router.post('/', createApplication);
 router.patch('/:id', updateApplication);

@@ -17,6 +17,7 @@ const initialValues: NewApplication = {
   link: '',
   status: 'applied',
   appliedAt: today,
+  followUpDate: '',
 };
 
 const validationSchema = Yup.object({
@@ -25,6 +26,7 @@ const validationSchema = Yup.object({
   link: Yup.string().trim().url('Enter a valid URL, e.g. https://...'),
   status: Yup.string().oneOf(STATUSES).required(),
   appliedAt: Yup.date().required('Date is required'),
+  followUpDate: Yup.string(),
 });
 
 export default function ApplicationForm({ onSubmit }: ApplicationFormProps) {
@@ -76,6 +78,11 @@ export default function ApplicationForm({ onSubmit }: ApplicationFormProps) {
             Applied on
             <Field className={css.input} name="appliedAt" type="date" />
             <ErrorMessage className={css.error} name="appliedAt" component="span" />
+          </label>
+
+          <label className={css.label}>
+            Follow up on (optional)
+            <Field className={css.input} name="followUpDate" type="date" />
           </label>
 
           <button className={css.button} type="submit" disabled={isSubmitting}>

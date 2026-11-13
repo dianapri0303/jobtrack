@@ -1,10 +1,16 @@
 import { Application, STATUSES } from '../models/application.js';
+import { buildSummary } from '../utils/summary.js';
 
 export const getApplications = async (req, res) => {
   const { status } = req.query;
   const filter = STATUSES.includes(status) ? { status } : {};
   const applications = await Application.find(filter).sort({ appliedAt: -1 });
   res.json(applications);
+};
+
+export const getSummary = async (req, res) => {
+  const applications = await Application.find().sort({ appliedAt: 1 }).lean();
+  res.json(buildSummary(applications));
 };
 
 export const getApplicationById = async (req, res) => {

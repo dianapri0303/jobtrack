@@ -161,7 +161,39 @@ Tools I used while learning, including AI assistants, are described in [AI.md](A
 - Axios instance: https://axios-http.com/docs/instance
 - Express 5 migration guide (`app.listen` changes): https://expressjs.com/en/guide/migrating-5.html
 
+## Day 6 — 13.11.2026 · Follow-up list and monthly statistics
+
+**What I needed to learn and why**
+
+- How to turn stored applications into useful output: who I should contact today and how close I am to my goal of 30 applications per month. This is the main "actionable output" of the app.
+- How to design this logic so it is easy to test later in CI.
+
+**What I learned**
+
+- I put the business rules into pure functions (`needsFollowUp` and `buildSummary` in `backend/src/utils/summary.js`). They take data and a date and return a result, without touching the database. The date is a parameter (`now`), so tests can use a fixed date and always get the same result.
+- Follow-up rules I chose: an application needs a follow-up if its follow-up date is today or in the past, or if it has no follow-up date, is still `applied` and was sent 7 or more days ago. `offer` and `rejected` never need a follow-up.
+- Route order matters in Express. `GET /applications/summary` must be registered before `GET /applications/:id`, otherwise Express treats `summary` as an id.
+- `.lean()` in Mongoose returns plain JavaScript objects, which is faster for read-only data.
+- Mongoose saves an empty string for a `Date` field as `null`, so an empty optional date from the form does not break validation.
+- Query keys can be hierarchical. Both the list (`['applications', 'list', status]`) and the summary (`['applications', 'summary']`) start with `'applications'`, so one `invalidateQueries({ queryKey: ['applications'] })` refreshes the list, the statistics and the follow-ups together.
+- Limitation: "today" is calculated in the server's time zone. This is fine for the UK in winter (UTC), but a real product would need the user's time zone.
+
+**How I tested**
+
+- `curl http://localhost:4000/api/applications/summary` returns the month, goal, counts by status and the follow-up list.
+- An application sent 10 days ago with no follow-up date appears in "Follow up today".
+- An application with today's follow-up date appears; a `rejected` one with today's date does not.
+- Clicking "Followed up" moves the next follow-up 7 days ahead and removes it from today's list.
+- The monthly counter and progress bar update after adding an application.
+- `npm run lint` passes.
+
+**Sources**
+
+- Express routing (route order and parameters): https://expressjs.com/en/guide/routing.html
+- TanStack Query invalidation from mutations: https://tanstack.com/query/latest/docs/framework/react/guides/invalidations-from-mutations
+- Mongoose lean: https://mongoosejs.com/docs/tutorials/lean.html
+
 ## Next
 
-- Follow-up list ("who to contact today") and monthly statistics with a goal of 30 applications.
 - GitHub Actions to run lint and tests on every push. This is new for me, and I will document how I learn it here.
+- Unit tests for `needsFollowUp` and `buildSummary`, and API tests for the main routes.
