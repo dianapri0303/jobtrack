@@ -222,6 +222,11 @@ Tools I used while learning, including AI assistants, are described in [AI.md](A
 - GitHub Actions was completely new to me. I wanted every push to be checked automatically, not only on my laptop, because this is a basic DevOps practice.
 - How to deploy a project where the frontend and backend live in one repository but on two different platforms.
 
+**What did not work**
+
+- After deploying the frontend, I first copied the address of a single Vercel deployment (`jobtrack-<id>-<team>.vercel.app`). These deployment URLs can be protected by Vercel login, so other people might not see the app. I switched to the project's production domain and checked it in an incognito window, where it opened without a login.
+- On Render I first opened the root URL of the API and got `{"message":"Route not found"}`. This was actually correct: there is no route for `/`, only for `/api/...`. Opening `/api/health` returned `{"status":"ok"}`.
+
 **What I learned about CI**
 
 - A workflow is a YAML file in `.github/workflows/`. `on: push` and `on: pull_request` decide when it runs.
@@ -240,11 +245,12 @@ Tools I used while learning, including AI assistants, are described in [AI.md](A
 - `NEXT_PUBLIC_` variables are added to the frontend code at build time, so after changing one in Vercel I need to redeploy.
 - The free Render plan stops the service after a period without requests, so the first request after a break can take up to about a minute.
 - The `/api/health` endpoint from Day 2 was useful: it was the first thing I checked after the backend deployed.
+- The live demo uses one shared database and has no login, so everyone who opens it sees the same list of applications. Authentication is the first thing I would add next.
 
 **How I tested**
 
 - The first GitHub Actions run passed: backend tests, frontend lint and build.
-- On the deployed site I loaded the applications page, added an application, used the status filter and checked the follow-up list and monthly statistics.
+- On the deployed site, in an incognito window, I loaded the applications page, saw the statistics and the list, and checked that the data comes from MongoDB.
 
 **Sources**
 
