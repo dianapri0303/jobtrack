@@ -193,7 +193,62 @@ Tools I used while learning, including AI assistants, are described in [AI.md](A
 - TanStack Query invalidation from mutations: https://tanstack.com/query/latest/docs/framework/react/guides/invalidations-from-mutations
 - Mongoose lean: https://mongoosejs.com/docs/tutorials/lean.html
 
-## Next
+## Day 7 — 14.11.2026 · Unit tests
 
-- GitHub Actions to run lint and tests on every push. This is new for me, and I will document how I learn it here.
-- Unit tests for `needsFollowUp` and `buildSummary`, and API tests for the main routes.
+**What I needed to learn and why**
+
+- How to test my follow-up and statistics logic automatically, so I do not have to re-check it by hand after every change.
+
+**What I learned**
+
+- Node.js has a built-in test runner (`node:test`) and assertion module (`node:assert/strict`), so I did not need to install a testing library for unit tests. `node --test` finds files ending in `.test.js`.
+- Because `needsFollowUp` and `buildSummary` take the current date as a parameter, each test passes a fixed date (`2026-11-14`). The tests give the same result on any day and on any computer.
+- I used dates with a fixed time in UTC (`T12:00:00Z`) so the tests do not depend on the time zone of the machine that runs them.
+- The tests cover the main rules: 7+ days without a reply, a follow-up date of today, a rejected application, and counting only the current month.
+
+**How I tested**
+
+- `npm test` in the `backend` folder: 5 tests pass, 0 fail.
+
+**Sources**
+
+- Node.js test runner: https://nodejs.org/api/test.html
+- Node.js assert: https://nodejs.org/api/assert.html
+
+## Day 8 — 15.11.2026 · GitHub Actions (CI) and deployment
+
+**What I needed to learn and why**
+
+- GitHub Actions was completely new to me. I wanted every push to be checked automatically, not only on my laptop, because this is a basic DevOps practice.
+- How to deploy a project where the frontend and backend live in one repository but on two different platforms.
+
+**What I learned about CI**
+
+- A workflow is a YAML file in `.github/workflows/`. `on: push` and `on: pull_request` decide when it runs.
+- My workflow has two jobs, `backend` and `frontend`. Jobs run in parallel on fresh Ubuntu machines, so a failure in one part is easy to see.
+- `working-directory` lets one repository hold two projects: each job runs its commands inside `backend` or `frontend`.
+- `actions/checkout` downloads the code and `actions/setup-node` installs Node.js and caches npm packages using the `package-lock.json` file of each project.
+- I use `npm ci` instead of `npm install` in CI. It installs exactly the versions from `package-lock.json` and fails if the lock file does not match `package.json`, so the build is reproducible.
+- The backend job runs the unit tests. The frontend job runs ESLint and a production build, which also catches TypeScript errors.
+- YAML depends on indentation, so I copied the structure carefully and checked the result in the Actions tab.
+
+**What I learned about deployment**
+
+- Render runs the Express API with `backend` as the root directory, `npm ci` to install and `npm start` to run. Render provides its own `PORT`, and my code already reads `process.env.PORT`.
+- Vercel runs the Next.js app with `frontend` as the root directory.
+- Secrets are not in the repository. I added `MONGODB_URI` in the Render dashboard and `NEXT_PUBLIC_API_URL` in the Vercel dashboard.
+- `NEXT_PUBLIC_` variables are added to the frontend code at build time, so after changing one in Vercel I need to redeploy.
+- The free Render plan stops the service after a period without requests, so the first request after a break can take up to about a minute.
+- The `/api/health` endpoint from Day 2 was useful: it was the first thing I checked after the backend deployed.
+
+**How I tested**
+
+- The first GitHub Actions run passed: backend tests, frontend lint and build.
+- On the deployed site I loaded the applications page, added an application, used the status filter and checked the follow-up list and monthly statistics.
+
+**Sources**
+
+- GitHub Actions: building and testing Node.js: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
+- `npm ci`: https://docs.npmjs.com/cli/commands/npm-ci
+- Deploy an Express app on Render: https://render.com/docs/deploy-node-express-app
+- Next.js on Vercel: https://vercel.com/docs/frameworks/nextjs
