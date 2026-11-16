@@ -4,6 +4,7 @@ export const STATUSES = ['applied', 'interview', 'offer', 'rejected'];
 
 const applicationSchema = new Schema(
   {
+    owner: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     company: { type: String, required: true, trim: true },
     position: { type: String, required: true, trim: true },
     link: { type: String, trim: true },

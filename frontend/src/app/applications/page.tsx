@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import ApplicationForm from '@/components/ApplicationForm/ApplicationForm';
 import ApplicationList from '@/components/ApplicationList/ApplicationList';
@@ -13,6 +14,7 @@ import {
   fetchSummary,
   updateApplication,
 } from '@/lib/api';
+import { clearSession, getEmail, getToken } from '@/lib/auth';
 import type { NewApplication } from '@/types/application';
 import css from './page.module.css';
 
@@ -25,8 +27,20 @@ const getNextFollowUpDate = () => {
 };
 
 export default function ApplicationsPage() {
-  const [statusFilter, setStatusFilter] = useState<StatusFilterValue>('all');
+  const router = useRouter();
   const queryClient = useQueryClient();
+  const [isReady, setIsReady] = useState(false);
+  const [email, setEmail] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<StatusFilterValue>('all');
+
+  useEffect(() => {
+    if (!getToken()) {
+      router.replace('/login');
+      return;
+    }
+    setEmail(getEmail());
+    setIsReady(true);
+  }, [router]);
 
   const {
     data: applications = [],
@@ -35,11 +49,13 @@ export default function ApplicationsPage() {
   } = useQuery({
     queryKey: ['applications', 'list', statusFilter],
     queryFn: () => fetchApplications(statusFilter === 'all' ? undefined : statusFilter),
+    enabled: isReady,
   });
 
   const { data: summary } = useQuery({
     queryKey: ['applications', 'summary'],
     queryFn: fetchSummary,
+    enabled: isReady,
   });
 
   const refreshAll = () => queryClient.invalidateQueries({ queryKey: ['applications'] });
@@ -58,9 +74,27 @@ export default function ApplicationsPage() {
     await createMutation.mutateAsync(values);
   };
 
+  const handleLogout = () => {
+    clearSession();
+    queryClient.clear();
+    router.replace('/login');
+  };
+
+  if (!isReady) {
+    return null;
+  }
+
   return (
     <main className={css.main}>
-      <h1 className={css.title}>My applications</h1>
+      <div className={css.topBar}>
+        <h1 className={css.title}>My applications</h1>
+        <div className={css.user}>
+          <span className={css.email}>{email}</span>
+          <button className={css.logout} type="button" onClick={handleLogout}>
+            Log out
+          </button>
+        </div>
+      </div>
 
       {summary && <StatsPanel summary={summary} />}
 

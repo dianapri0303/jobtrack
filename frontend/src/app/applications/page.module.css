@@ -7,9 +7,43 @@
   gap: 24px;
 }
 
+.topBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
 .title {
   margin: 0;
   font-size: 36px;
+}
+
+.user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.email {
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+.logout {
+  padding: 8px 14px;
+  border: 1px solid #d0d7de;
+  border-radius: 8px;
+  background-color: transparent;
+  color: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.logout:hover {
+  background-color: #f6f8fa;
+  color: #1f2328;
 }
 
 .header {

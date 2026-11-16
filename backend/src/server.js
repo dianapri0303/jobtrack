@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import authRouter from './routes/authRouter.js';
 import applicationsRouter from './routes/applicationsRouter.js';
 
 export const startServer = () => {
@@ -13,6 +14,7 @@ export const startServer = () => {
     res.json({ status: 'ok' });
   });
 
+  app.use('/api/auth', authRouter);
   app.use('/api/applications', applicationsRouter);
 
   app.use((req, res) => {
@@ -28,6 +30,9 @@ export const startServer = () => {
     }
     if (err.name === 'CastError') {
       return res.status(400).json({ message: 'Invalid id' });
+    }
+    if (err.code === 11000) {
+      return res.status(409).json({ message: 'Email is already registered' });
     }
     console.error(err);
     res.status(500).json({ message: 'Internal server error' });

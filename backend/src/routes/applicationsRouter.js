@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { authenticate } from '../middleware/authenticate.js';
 import {
   getApplications,
   getSummary,
@@ -9,6 +10,8 @@ import {
 } from '../controllers/applicationsController.js';
 
 const router = Router();
+
+router.use(authenticate);
 
 router.get('/', getApplications);
 router.get('/summary', getSummary);
