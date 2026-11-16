@@ -226,6 +226,7 @@ Tools I used while learning, including AI assistants, are described in [AI.md](A
 
 - After deploying the frontend, I first copied the address of a single Vercel deployment (`jobtrack-<id>-<team>.vercel.app`). These deployment URLs can be protected by Vercel login, so other people might not see the app. I switched to the project's production domain and checked it in an incognito window, where it opened without a login.
 - On Render I first opened the root URL of the API and got `{"message":"Route not found"}`. This was actually correct: there is no route for `/`, only for `/api/...`. Opening `/api/health` returned `{"status":"ok"}`.
+- When I opened the live demo in an incognito window, I saw all my test applications. Without accounts, everyone with the link shared one list. I decided this was not acceptable for a public demo and added authentication the next day.
 
 **What I learned about CI**
 
@@ -245,7 +246,6 @@ Tools I used while learning, including AI assistants, are described in [AI.md](A
 - `NEXT_PUBLIC_` variables are added to the frontend code at build time, so after changing one in Vercel I need to redeploy.
 - The free Render plan stops the service after a period without requests, so the first request after a break can take up to about a minute.
 - The `/api/health` endpoint from Day 2 was useful: it was the first thing I checked after the backend deployed.
-- The live demo uses one shared database and has no login, so everyone who opens it sees the same list of applications. Authentication is the first thing I would add next.
 
 **How I tested**
 
@@ -258,3 +258,42 @@ Tools I used while learning, including AI assistants, are described in [AI.md](A
 - `npm ci`: https://docs.npmjs.com/cli/commands/npm-ci
 - Deploy an Express app on Render: https://render.com/docs/deploy-node-express-app
 - Next.js on Vercel: https://vercel.com/docs/frameworks/nextjs
+
+## Day 9 — 16.11.2026 · User accounts and private data
+
+**What I needed to learn and why**
+
+- How to add sign-up and login so that each user only sees their own applications. The public demo showed one shared list, which is not acceptable for personal job-search data.
+- How to store passwords safely and how token-based authentication works.
+
+**What I learned**
+
+- Passwords must never be stored as plain text. bcrypt turns a password into a salted hash that cannot be reversed. `bcrypt.compare` checks a login attempt against the hash. I use a cost factor of 10.
+- A JWT is signed, not encrypted: anyone can read its payload, but nobody can change it without the secret. So I only put the user id (`sub`) in it, never the password or email, and set it to expire after 7 days.
+- An Express middleware (`authenticate`) checks the `Authorization: Bearer <token>` header before every application route and puts the user id on `req.userId`.
+- Authorization is more than checking the token. Every query includes `owner: req.userId` (`findOne`, `findOneAndUpdate`, `findOneAndDelete`), so a logged-in user still cannot access another user's application by guessing its id. In that case the API answers `404`, as if the application does not exist.
+- The server sets `owner` itself when creating an application and removes `owner` from update requests, so it cannot be changed from the client.
+- Login returns the same message for a wrong email and a wrong password, so it does not reveal which emails have accounts.
+- A unique index on `email` protects against duplicates. MongoDB reports a duplicate with error code `11000`, which I turn into `409 Conflict`.
+- "Fail fast": the server now refuses to start when `JWT_SECRET` is missing, with a clear message, instead of failing later on the first login.
+- Deployment order matters. I added `JWT_SECRET` to Render before pushing the new code. Otherwise the automatic deploy would start the new code without the secret and stop immediately.
+- On the frontend, an Axios request interceptor adds the token to every request, and a response interceptor sends the user to the login page if the token is no longer valid. On logout I clear the TanStack Query cache, so the next person on the same computer does not see the previous user's data.
+- Trade-off: I store the token in `localStorage` because it is simple. An httpOnly cookie would be safer against XSS, and I listed it as the next improvement in the README.
+- Applications created before this change have no `owner`, so they are no longer visible to anyone. For a demo this is acceptable; in a real product I would write a migration to assign them to a user.
+
+**How I tested**
+
+- `curl http://localhost:4000/api/applications` without a token returns `401 Not authorized`.
+- The applications page redirects to the login page when I am not logged in.
+- I registered two accounts. An application added by the first account is not visible to the second, and it is visible again after logging back in as the first.
+- A wrong password shows "Invalid email or password". Registering the same email twice shows "Email is already registered". A password shorter than 8 characters is rejected in the form.
+- `npm test` and `npm run lint` pass, and the GitHub Actions run is green.
+- I repeated the main checks on the deployed site in an incognito window.
+
+**Sources**
+
+- OWASP Password Storage Cheat Sheet: https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html
+- OWASP Authentication Cheat Sheet: https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html
+- Introduction to JSON Web Tokens: https://jwt.io/introduction
+- bcryptjs: https://www.npmjs.com/package/bcryptjs
+- jsonwebtoken: https://www.npmjs.com/package/jsonwebtoken
