@@ -23,12 +23,26 @@ test('follow-up date today needs a follow-up', () => {
   assert.equal(needsFollowUp(application, now), true);
 });
 
+test('follow-up date in the future wins over the 7-day rule', () => {
+  const application = {
+    status: 'applied',
+    appliedAt: '2026-11-01T12:00:00Z',
+    followUpDate: '2026-11-20T00:00:00Z',
+  };
+  assert.equal(needsFollowUp(application, now), false);
+});
+
 test('rejected application never needs a follow-up', () => {
   const application = {
     status: 'rejected',
     appliedAt: '2026-10-01T12:00:00Z',
     followUpDate: '2026-11-01T00:00:00Z',
   };
+  assert.equal(needsFollowUp(application, now), false);
+});
+
+test('offer never needs a follow-up', () => {
+  const application = { status: 'offer', appliedAt: '2026-11-01T12:00:00Z' };
   assert.equal(needsFollowUp(application, now), false);
 });
 
@@ -45,4 +59,14 @@ test('buildSummary counts only applications from this month', () => {
   assert.equal(summary.appliedThisMonth, 2);
   assert.equal(summary.remaining, 28);
   assert.equal(summary.byStatus.interview, 1);
+});
+
+test('remaining never goes below zero when the goal is exceeded', () => {
+  const applications = Array.from({ length: 31 }, () => ({
+    status: 'applied',
+    appliedAt: '2026-11-10T12:00:00Z',
+  }));
+  const summary = buildSummary(applications, now);
+  assert.equal(summary.appliedThisMonth, 31);
+  assert.equal(summary.remaining, 0);
 });
